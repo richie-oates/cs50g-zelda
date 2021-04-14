@@ -115,6 +115,11 @@ function Room:generateObjects()
         math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
                     VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
         )
+    pot.onCollide = function()
+        if love.keyboard.isDown('lshift') then
+            self.player.hasPot = true
+        end
+    end
 
     -- add pot to list of objects in scene
     table.insert(self.objects, pot)
@@ -212,14 +217,14 @@ function Room:update(dt)
             object:onCollide()
             if object.solid then
                 -- Check collision direction and stop player from walking through it
-                if love.keyboard.isDown('left') then
+                if love.keyboard.isDown('left') and self.player.x > object.x + object.width / 2 then
                     self.player.x = object.x + object.width + 3
-                elseif love.keyboard.isDown('right') then
+                elseif love.keyboard.isDown('right') and self.player.x < object.x + object.width / 2 then
                     self.player.x = object.x - self.player.width - 3
-                elseif love.keyboard.isDown('up') then
+                elseif love.keyboard.isDown('up') and self.player.y + self.player.height / 2 > object.y + object.height / 2 then
                     self.player.y = object.y + object.height + 3 - self.player.height / 2
-                elseif love.keyboard.isDown('down') then
-                    self.player.y = object.y - self.player.height - 3
+                elseif love.keyboard.isDown('down') and self.player.y + self.player.height < object.y + object.height / 2 then
+                    self.player.y = object.y - self.player.height - 2
                 end
             end
             -- Assignment 5.1 - Check if object is consumable and remove if so

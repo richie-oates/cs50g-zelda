@@ -18,24 +18,31 @@ function PlayerWalkState:init(player, dungeon)
 end
 
 function PlayerWalkState:update(dt)
+    -- Different animations depending on whether the player is carrying the pot or not
     if love.keyboard.isDown('left') then
         self.entity.direction = 'left'
-        self.entity:changeAnimation('walk-left')
+        self.entity:changeAnimation(self.entity.hasPot and 'walk-pot-left' or 'walk-left')
     elseif love.keyboard.isDown('right') then
         self.entity.direction = 'right'
-        self.entity:changeAnimation('walk-right')
+        self.entity:changeAnimation(self.entity.hasPot and 'walk-pot-right' or 'walk-right')
     elseif love.keyboard.isDown('up') then
         self.entity.direction = 'up'
-        self.entity:changeAnimation('walk-up')
+        self.entity:changeAnimation(self.entity.hasPot and 'walk-pot-up' or 'walk-up')
     elseif love.keyboard.isDown('down') then
         self.entity.direction = 'down'
-        self.entity:changeAnimation('walk-down')
+        self.entity:changeAnimation(self.entity.hasPot and 'walk-pot-down' or 'walk-down')
     else
         self.entity:changeState('idle')
     end
 
     if love.keyboard.wasPressed('space') then
-        self.entity:changeState('swing-sword')
+        if not self.entity.hasPot then
+            self.entity:changeState('swing-sword')
+        end
+    end
+
+    if love.keyboard.wasPressed('lshift') and self.entity.hasPot then
+        self.entity.hasPot = false
     end
 
     -- perform base collision detection against walls

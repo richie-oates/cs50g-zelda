@@ -10,8 +10,8 @@ EntityIdleState = Class{__includes = BaseState}
 
 function EntityIdleState:init(entity)
     self.entity = entity
-
-    self.entity:changeAnimation('idle-' .. self.entity.direction)
+    -- Assignment 5.2 Animation depends on whether player has pot or not
+    self.entity:changeAnimation('idle-' .. self.entity.direction) 
 
     -- used for AI waiting
     self.waitDuration = 0

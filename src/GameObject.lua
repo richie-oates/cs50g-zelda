@@ -31,6 +31,9 @@ function GameObject:init(def, x, y)
 
     -- default empty collision callback
     self.onCollide = function() end
+
+    -- Assignment 5.1
+    self.consumable = def.consumable or false
 end
 
 function GameObject:update(dt)
@@ -38,6 +41,9 @@ function GameObject:update(dt)
 end
 
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)
-    love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.states[self.state].frame or self.frame],
+    if self.states then
+        self.frame = self.states[self.state].frame
+    end
+    love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.frame],
         self.x + adjacentOffsetX, self.y + adjacentOffsetY)
 end

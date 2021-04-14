@@ -64,7 +64,8 @@ function Room:generateEntities()
             width = 16,
             height = 16,
 
-            health = 1
+            health = 1,
+            maxHealth = 1,            
         })
 
         self.entities[i].stateMachine = StateMachine {
@@ -157,8 +158,22 @@ function Room:update(dt)
         local entity = self.entities[i]
 
         -- remove entity from the table if health is <= 0
-        if entity.health <= 0 then
+        if entity.health <= 0 and not entity.dead then
+            -- Assignment 5.1 - 1 in 5 chance to Spawn a heart and
+            -- add to list of objects in scene
+            if math.random(5) == 1 then
+                local heartPickup = GameObject(
+                    GAME_OBJECT_DEFS['heart'],
+                    entity.x,
+                    entity.y)
+                    heartPickup.onCollide = function()
+                        self.player:damage(-2)
+                    end
+                table.insert(self.objects, heartPickup)
+            end
+
             entity.dead = true
+
         elseif not entity.dead then
             entity:processAI({room = self}, dt)
             entity:update(dt)
@@ -182,6 +197,11 @@ function Room:update(dt)
         -- trigger collision callback on object
         if self.player:collides(object) then
             object:onCollide()
+
+            -- Assignment 5.1 - Check if object is consumable and remove if so
+            if object.consumable then
+                table.remove(self.objects, k)
+            end            
         end
     end
 end

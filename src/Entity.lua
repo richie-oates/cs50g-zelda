@@ -28,6 +28,7 @@ function Entity:init(def)
     self.walkSpeed = def.walkSpeed
 
     self.health = def.health
+    self.maxHealth = def.maxHealth
 
     -- flags for flashing the entity when hit
     self.invulnerable = false
@@ -38,6 +39,7 @@ function Entity:init(def)
     self.flashTimer = 0
 
     self.dead = false
+    self.onKill = function() end
 end
 
 function Entity:createAnimations(animations)
@@ -63,7 +65,7 @@ function Entity:collides(target)
 end
 
 function Entity:damage(dmg)
-    self.health = self.health - dmg
+    self.health = math.min(self.health - dmg, self.maxHealth) --[[prevent health from going above maxHealth--]]
 end
 
 function Entity:goInvulnerable(duration)

@@ -105,6 +105,19 @@ function Room:generateObjects()
 
     -- add to list of objects in scene (only one switch for now)
     table.insert(self.objects, switch)
+
+    -- Assignment 5.2 - Generate pots in random places in room
+    -- Make sure they're not too close to each other
+    local pot = GameObject(
+        GAME_OBJECT_DEFS['pot'],
+        math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
+                    VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
+        math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
+                    VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
+        )
+
+    -- add pot to list of objects in scene
+    table.insert(self.objects, pot)
 end
 
 --[[
@@ -197,7 +210,18 @@ function Room:update(dt)
         -- trigger collision callback on object
         if self.player:collides(object) then
             object:onCollide()
-
+            if object.solid then
+                -- Check collision direction and stop player from walking through it
+                if love.keyboard.isDown('left') then
+                    self.player.x = object.x + object.width + 3
+                elseif love.keyboard.isDown('right') then
+                    self.player.x = object.x - self.player.width - 3
+                elseif love.keyboard.isDown('up') then
+                    self.player.y = object.y + object.height + 3 - self.player.height / 2
+                elseif love.keyboard.isDown('down') then
+                    self.player.y = object.y - self.player.height - 3
+                end
+            end
             -- Assignment 5.1 - Check if object is consumable and remove if so
             if object.consumable then
                 table.remove(self.objects, k)

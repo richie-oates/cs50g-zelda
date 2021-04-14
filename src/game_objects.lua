@@ -38,6 +38,13 @@ GAME_OBJECT_DEFS = {
     },
 
     ['pot'] = {
-        -- TODO
+        -- Assignment 5.2 - pot gameobject
+        type = 'pot',
+        texture = 'tiles',
+        frame = 14, --[[Set fixed frame for now, later make it random--]]
+        width = 16,
+        height = 16,
+        solid = true,
+        consumable = false
     }
 }

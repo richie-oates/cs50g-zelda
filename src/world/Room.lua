@@ -23,6 +23,9 @@ function Room:init(player)
     self.objects = {}
     self:generateObjects()
 
+    -- Assignment 5.3  keep track of projectiles in the room
+    self.projectiles = {}
+
     -- doorways that lead to other dungeon rooms
     self.doorways = {}
     table.insert(self.doorways, Doorway('top', false, self))
@@ -115,9 +118,14 @@ function Room:generateObjects()
         math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
                     VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
         )
+    pot.index = #self.objects + 1
+    -- Assignment 5.2 - Change to lift-pot state if player is next to pot and left shift is pressed
     pot.onCollide = function()
-        if love.keyboard.isDown('lshift') then
-            self.player.hasPot = true
+        if love.keyboard.isDown('lshift') and not self.player.hasPot then
+            self.player.liftedObject = pot
+            self.player:changeState('lift-pot')
+            pot.solid = false
+            pot:lifting(self.player)
         end
     end
 
@@ -233,6 +241,11 @@ function Room:update(dt)
             end            
         end
     end
+
+    -- Assignment: update projectiles
+    for k, projectile in pairs(self.projectiles) do
+        projectile:update(dt)
+    end
 end
 
 function Room:render()
@@ -283,6 +296,11 @@ function Room:render()
     
     if self.player then
         self.player:render()
+    end
+
+    -- Assignment - render projectile last so it's on top
+    for k, projectile in pairs(self.projectiles) do
+        projectile:render(self.adjacentOffsetX, self.adjacentOffsetY)
     end
 
     love.graphics.setStencilTest()

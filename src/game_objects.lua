@@ -45,6 +45,8 @@ GAME_OBJECT_DEFS = {
         width = 16,
         height = 16,
         solid = true,
-        consumable = false
+        consumable = false,
+        carryable = true,
+        throwSpeed = 80
     }
 }

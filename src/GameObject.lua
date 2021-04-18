@@ -16,6 +16,7 @@ function GameObject:init(def, x, y)
 
     self.texture = def.texture
     self.frame = def.frame or 1
+    self.frames = def.frames
 
     -- whether it acts as an obstacle or not
     self.solid = def.solid

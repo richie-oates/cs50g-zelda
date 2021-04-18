@@ -13,13 +13,21 @@ function PlayerThrowPotState:init(player, dungeon)
     -- self.player.currentAnimation.forwards = false
 end
 
-function PlayerThrowPotState:update()
+function PlayerThrowPotState:enter(player, dungeon)
+    -- add projectile to table of projectiles and remove object from table of objects
+    local projectile = Projectile(self.player.liftedObject, self.player.direction)
+    table.insert(self.dungeon.currentRoom.projectiles, projectile)
+    for k, object in pairs(self.dungeon.currentRoom.objects) do
+        if object.lifted then
+            table.remove(self.dungeon.currentRoom.objects, k)
+        end
+    end
+end
+
+function PlayerThrowPotState:update()    
 	-- if we've fully elapsed through one cycle of animation, change back to idle state
     if self.player.currentAnimation.timesPlayed > 0 then
-        self.player.currentAnimation.timesPlayed = 0
-        local projectile = Projectile(self.player.liftedObject, self.player.direction)
-        table.insert(self.dungeon.currentRoom.projectiles, projectile)
-        table.remove(self.dungeon.currentRoom.objects, self.player.liftedObject.index)
+        self.player.currentAnimation.timesPlayed = 0       
         self.player.hasPot = false
         self.player:changeState('idle')
     end

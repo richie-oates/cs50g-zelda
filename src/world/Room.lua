@@ -111,26 +111,30 @@ function Room:generateObjects()
 
     -- Assignment 5.2 - Generate pots in random places in room
     -- Make sure they're not too close to each other
-    local pot = GameObject(
-        GAME_OBJECT_DEFS['pot'],
-        math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
-                    VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
-        math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
-                    VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
-        )
-    pot.index = #self.objects + 1
-    -- Assignment 5.2 - Change to lift-pot state if player is next to pot and left shift is pressed
-    pot.onCollide = function()
-        if love.keyboard.isDown('lshift') and not self.player.hasPot then
-            self.player.liftedObject = pot
-            self.player:changeState('lift-pot')
-            pot.solid = false
-            pot:lifting(self.player)
+    for i = 1, math.random(1, 10) do
+        local pot = GameObject(
+            GAME_OBJECT_DEFS['pot'],
+            math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
+                        VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
+            math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
+                        VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
+            )
+        pot.frame = pot.frames[math.random(1, 9)]
+        pot.index = #self.objects + 1
+        -- Assignment 5.2 - Change to lift-pot state if player is next to pot and left shift is pressed
+        pot.onCollide = function()
+            if love.keyboard.isDown('lshift') and not self.player.hasPot then
+                self.player.liftedObject = pot
+                self.player:changeState('lift-pot')
+                pot.solid = false
+                pot:lifting(self.player)
+                pot.lifted = true
+            end
         end
-    end
 
-    -- add pot to list of objects in scene
-    table.insert(self.objects, pot)
+        -- add pot to list of objects in scene
+        table.insert(self.objects, pot)
+    end
 end
 
 --[[
@@ -242,9 +246,27 @@ function Room:update(dt)
         end
     end
 
+    local projectilesToDestroy = {}
+
     -- Assignment: update projectiles
     for k, projectile in pairs(self.projectiles) do
         projectile:update(dt)
+        if projectile.destroy then
+            table.insert(projectilesToDestroy, k)
+        end
+        -- Check for collisions with entities and apply damage if so
+        -- Also remove projectile and possibly later call a pot breaking animation
+        for j, entity in pairs(self.entities) do
+            if projectile:collides(entity) and not entity.dead then
+                entity:damage(1)
+                table.insert(projectilesToDestroy, k)
+            end
+        end
+    end
+
+    for i, index in pairs(projectilesToDestroy) do
+        table.remove(self.projectiles, index)
+        gSounds['hit-enemy']:play()
     end
 end
 

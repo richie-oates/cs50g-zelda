@@ -19,6 +19,8 @@ function Projectile:init(object, direction)
     self.height = object.height
     self.throwSpeed = object.defs.throwSpeed
     self.dx, self.dy = 0, 0
+    self.thrownDistance = 0
+    self.destroy = false
 
     if direction == 'left' then
     	self.dx = - self.throwSpeed
@@ -35,6 +37,18 @@ end
 function Projectile:update(dt)
 	self.x = self.x + self.dx * dt
 	self.y = self.y + self.dy * dt
+
+	self.thrownDistance = self.thrownDistance + math.abs(self.dy + self.dx) * dt
+	if self.thrownDistance > 3 * TILE_SIZE then
+		self.destroy = true
+	end
+end
+
+function Projectile:collides(target)
+    local selfY, selfHeight = self.y + self.height / 2, self.height - self.height / 2
+    
+    return not (self.x + self.width < target.x or self.x > target.x + target.width or
+                selfY + selfHeight < target.y or selfY > target.y + target.height)
 end
 
 -- function Projectile:render()

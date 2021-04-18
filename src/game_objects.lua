@@ -42,11 +42,12 @@ GAME_OBJECT_DEFS = {
         type = 'pot',
         texture = 'tiles',
         frame = 14, --[[Set fixed frame for now, later make it random--]]
+        frames = {14, 15 ,16, 33, 34, 35, 52, 53, 54},
         width = 16,
         height = 16,
         solid = true,
         consumable = false,
         carryable = true,
-        throwSpeed = 80
+        throwSpeed = 120
     }
 }

@@ -23,6 +23,9 @@ function Room:init(player)
     self.objects = {}
     self:generateObjects()
 
+    -- Assignment 5.3  keep track of projectiles in the room
+    self.projectiles = {}
+
     -- doorways that lead to other dungeon rooms
     self.doorways = {}
     table.insert(self.doorways, Doorway('top', false, self))
@@ -105,6 +108,33 @@ function Room:generateObjects()
 
     -- add to list of objects in scene (only one switch for now)
     table.insert(self.objects, switch)
+
+    -- Assignment 5.2 - Generate pots in random places in room
+    -- Make sure they're not too close to each other
+    for i = 1, math.random(1, 10) do
+        local pot = GameObject(
+            GAME_OBJECT_DEFS['pot'],
+            math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
+                        VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
+            math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
+                        VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
+            )
+        pot.frame = pot.frames[math.random(1, 9)]
+        pot.index = #self.objects + 1
+        -- Assignment 5.2 - Change to lift-pot state if player is next to pot and left shift is pressed
+        pot.onCollide = function()
+            if love.keyboard.isDown('lshift') and not self.player.hasPot then
+                self.player.liftedObject = pot
+                self.player:changeState('lift-pot')
+                pot.solid = false
+                pot:lifting(self.player)
+                pot.lifted = true
+            end
+        end
+
+        -- add pot to list of objects in scene
+        table.insert(self.objects, pot)
+    end
 end
 
 --[[
@@ -197,12 +227,46 @@ function Room:update(dt)
         -- trigger collision callback on object
         if self.player:collides(object) then
             object:onCollide()
-
+            if object.solid then
+                -- Check collision direction and stop player from walking through it
+                if love.keyboard.isDown('left') and self.player.x > object.x + object.width / 2 then
+                    self.player.x = object.x + object.width + 3
+                elseif love.keyboard.isDown('right') and self.player.x < object.x + object.width / 2 then
+                    self.player.x = object.x - self.player.width - 3
+                elseif love.keyboard.isDown('up') and self.player.y + self.player.height / 2 > object.y + object.height / 2 then
+                    self.player.y = object.y + object.height + 3 - self.player.height / 2
+                elseif love.keyboard.isDown('down') and self.player.y + self.player.height < object.y + object.height / 2 then
+                    self.player.y = object.y - self.player.height - 2
+                end
+            end
             -- Assignment 5.1 - Check if object is consumable and remove if so
             if object.consumable then
                 table.remove(self.objects, k)
             end            
         end
+    end
+
+    local projectilesToDestroy = {}
+
+    -- Assignment: update projectiles
+    for k, projectile in pairs(self.projectiles) do
+        projectile:update(dt)
+        if projectile.destroy then
+            table.insert(projectilesToDestroy, k)
+        end
+        -- Check for collisions with entities and apply damage if so
+        -- Also remove projectile and possibly later call a pot breaking animation
+        for j, entity in pairs(self.entities) do
+            if projectile:collides(entity) and not entity.dead then
+                entity:damage(1)
+                table.insert(projectilesToDestroy, k)
+            end
+        end
+    end
+
+    for i, index in pairs(projectilesToDestroy) do
+        table.remove(self.projectiles, index)
+        gSounds['hit-enemy']:play()
     end
 end
 
@@ -254,6 +318,11 @@ function Room:render()
     
     if self.player then
         self.player:render()
+    end
+
+    -- Assignment - render projectile last so it's on top
+    for k, projectile in pairs(self.projectiles) do
+        projectile:render(self.adjacentOffsetX, self.adjacentOffsetY)
     end
 
     love.graphics.setStencilTest()

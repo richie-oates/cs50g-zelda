@@ -9,12 +9,14 @@
 GameObject = Class{}
 
 function GameObject:init(def, x, y)
+    self.defs = def
     
     -- string identifying this object type
     self.type = def.type
 
     self.texture = def.texture
     self.frame = def.frame or 1
+    self.frames = def.frames
 
     -- whether it acts as an obstacle or not
     self.solid = def.solid
@@ -34,10 +36,17 @@ function GameObject:init(def, x, y)
 
     -- Assignment 5.1
     self.consumable = def.consumable or false
+    -- Assignment 5.3
+    self.liftable = def.liftable or false
+    self.lifted = false
 end
 
 function GameObject:update(dt)
 
+end
+
+function GameObject:lifting(player)
+    Timer.tween(0.465, {[self] = {y = player.y - self.height + 2, x = player.x}})
 end
 
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)

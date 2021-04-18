@@ -27,9 +27,11 @@ end
 function PlayerThrowPotState:update()    
 	-- if we've fully elapsed through one cycle of animation, change back to idle state
     if self.player.currentAnimation.timesPlayed > 0 then
-        self.player.currentAnimation.timesPlayed = 0       
-        self.player.hasPot = false
-        self.player:changeState('idle')
+        self.player.currentAnimation.timesPlayed = 0
+        self.player:changeAnimation('idle-' .. self.player.direction)
+        Timer.after(0.5, function () 
+            self.player.hasPot = false
+            self.player:changeState('idle') end)       
     end
 end
 

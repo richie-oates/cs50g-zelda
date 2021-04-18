@@ -48,6 +48,7 @@ GAME_OBJECT_DEFS = {
         solid = true,
         consumable = false,
         carryable = true,
-        throwSpeed = 120
+        throwSpeed = 120,
+        maxThrowDistance = 4 * TILE_SIZE
     }
 }
